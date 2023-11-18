@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Timer;
 
-public class Opciones {
+public class Opciones extends javax.swing.JFrame {
     private JPanel form;
     private JButton encriptarButton;
     private JButton desencriptarButton;
@@ -116,14 +116,16 @@ public class Opciones {
             String llave = keyAndSalt.get(0);
             String salt = keyAndSalt.get(1);
             String valueToCrypt = textAreaValor.getText().trim();
-            if(llave != "" && !llave.isEmpty() && salt != "" && !salt.isEmpty() && valueToCrypt != "" && !valueToCrypt.isEmpty()){
+            if(!Objects.equals(llave, "") && llave != null && !Objects.equals(salt, "") && salt != null && !valueToCrypt.isEmpty()){
                 try {
                     String cryptValue = crypt(valueToCrypt,salt.getBytes("UTF-8"),llave);
                     textAreaResultado.setText(cryptValue);
                     JOptionPane.showMessageDialog(null, "Valor encriptado correctamente.","Éxito",JOptionPane.INFORMATION_MESSAGE);
                 } catch (GeneralSecurityException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 } catch (UnsupportedEncodingException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 }
             }else{
@@ -161,8 +163,10 @@ public class Opciones {
                     textAreaResultado.setText(decryptValue);
                     JOptionPane.showMessageDialog(null, "Valor desencriptado correctamente.","Éxito",JOptionPane.INFORMATION_MESSAGE);
                 } catch (GeneralSecurityException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 } catch (IOException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 }
             }else{
@@ -183,8 +187,14 @@ public class Opciones {
     public List<String> getKeyAndSalt(boolean checked){
         List<String> valores = new ArrayList<>();
         if(checked){
-            valores.add(System.getenv("AES_256_PASS"));
-            valores.add(System.getenv("AES_256_SALT"));
+            if(System.getenv("AES_256_PASS") != null && System.getenv("AES_256_SALT") != null){
+                valores.add(System.getenv("AES_256_PASS"));
+                valores.add(System.getenv("AES_256_SALT"));
+            }else{
+                valores.add(null);
+                valores.add(null);
+                JOptionPane.showMessageDialog(null, "No se cuentan con las variables de entorno configuradas", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }else{
             valores.add(txtAreaLlave.getText().trim());
             valores.add(textSalt.getText().trim());
