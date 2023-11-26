@@ -187,8 +187,10 @@ public class Opciones extends javax.swing.JFrame {
             if(llave != "" && !llave.isEmpty() && valueToDecrypt != "" && !valueToDecrypt.isEmpty()){
                 try {
                     String decryptValue = decrypt(valueToDecrypt, llave);
-                    textAreaResultado.setText(decryptValue);
-                    JOptionPane.showMessageDialog(null, "Valor desencriptado correctamente.","Éxito",JOptionPane.INFORMATION_MESSAGE);
+                    if(decryptValue != null){
+                        textAreaResultado.setText(decryptValue);
+                        JOptionPane.showMessageDialog(null, "Valor desencriptado correctamente.","Éxito",JOptionPane.INFORMATION_MESSAGE);
+                    }
                 } catch (GeneralSecurityException ex) {
                     System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
@@ -279,18 +281,25 @@ public class Opciones extends javax.swing.JFrame {
 
     //Decrypt values
     public String decrypt(String cadena, String password) throws GeneralSecurityException, IOException {
-        String decodeString = new String(Base64.getDecoder().decode(cadena));
-        String[] parts = decodeString.split(":");
-        String IV = parts[0];
-        String salt = parts[1];
-        String property = parts[2];
-        //Generar secret key
-        SecretKeySpec secretKey = createSecretKey(password.toCharArray(), base64Decode(salt), ITERATION_COUNT, KEY_LENGTH);
-        Cipher pbeCipher = Cipher.getInstance("AES/GCM/NoPadding");
-        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, base64Decode(IV));
-        pbeCipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
-        byte[] decryptoText = pbeCipher.doFinal(base64Decode(property));
-        return new String(decryptoText, "UTF-8");
+        String response = null;
+        try{
+            String decodeString = new String(Base64.getDecoder().decode(cadena));
+            String[] parts = decodeString.split(":");
+            String IV = parts[0];
+            String salt = parts[1];
+            String property = parts[2];
+            //Generar secret key
+            SecretKeySpec secretKey = createSecretKey(password.toCharArray(), base64Decode(salt), ITERATION_COUNT, KEY_LENGTH);
+            Cipher pbeCipher = Cipher.getInstance("AES/GCM/NoPadding");
+            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, base64Decode(IV));
+            pbeCipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
+            byte[] decryptoText = pbeCipher.doFinal(base64Decode(property));
+            response = new String(decryptoText, "UTF-8");
+        }catch(Exception e){
+            System.out.println("Error = " + e.getMessage());
+            JOptionPane.showMessageDialog(null,"Ocurrió un error al realiza la desencriptación, verifique el valor a desencriptar","Error",JOptionPane.ERROR_MESSAGE);
+        }
+        return response;
     }
 
     //Action listen button generate
