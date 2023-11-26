@@ -35,6 +35,10 @@ public class Opciones extends javax.swing.JFrame {
     private JLabel txtSalt;
     private JLabel lblMessageCopy;
     private JButton btnClean;
+    private JButton btnRandom;
+    private JTextArea textSizeGenerate;
+    private JTextArea textAreaGenerate;
+    private JButton copiarButton2;
 
     //Cont use for crypt and decrypt
     final int ITERATION_COUNT = 4000;
@@ -52,7 +56,7 @@ public class Opciones extends javax.swing.JFrame {
     public void OnInit(){
         frame.pack();
         //Configure the size of the UI
-        frame.setSize(640, 455);
+        frame.setSize(740, 555);
         frame.setVisible(true);
         frame.add(form);
         //Configure text format
@@ -64,6 +68,8 @@ public class Opciones extends javax.swing.JFrame {
         textAreaValor.setWrapStyleWord(true);
         textAreaResultado.setLineWrap(true);
         textAreaResultado.setWrapStyleWord(true);
+        textAreaGenerate.setLineWrap(true);
+        textAreaGenerate.setWrapStyleWord(true);
         //Listen when button is clicked to exit program
         salirButton.addActionListener(actionListenerExit);
         //Listen to checkBox changes to show or hide fields for key and salt
@@ -72,10 +78,14 @@ public class Opciones extends javax.swing.JFrame {
         encriptarButton.addActionListener(actionListenerEncriptarBtn);
         //Listen when button Copy is selected
         copiarButton.addActionListener(actionListenerCopy);
+        //Listen when button Copy 2 is selected
+        copiarButton2.addActionListener(actionListenerCopy2);
         //Listen when decrypt button is clicked
         desencriptarButton.addActionListener(actionListenerDesencriptarBtn);
         //Listen when clean button is clicked
         btnClean.addActionListener(actionListenerCleanBtn);
+        //Listen when button Generate random value is clicked
+        btnRandom.addActionListener(actionListenerGenerate);
         //Show or hide textArea for the key and salt for default
         if(tienesConfiguradaLaLlaveCheckBox.isSelected()){
             txtAreaLlave.setVisible(false);
@@ -103,7 +113,7 @@ public class Opciones extends javax.swing.JFrame {
                 textSalt.setVisible(true);
                 txtKey.setVisible(true);
                 txtSalt.setVisible(true);
-                frame.setSize(640, 550);
+                frame.setSize(740, 650);
             }
         }
     };
@@ -150,6 +160,23 @@ public class Opciones extends javax.swing.JFrame {
             }
         }
     };
+    //Copy clipboard 2
+    ActionListener actionListenerCopy2 = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            if(!textAreaGenerate.getText().isEmpty()){
+                textAreaGenerate.selectAll();
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                StringSelection stringToCopy = new StringSelection(textAreaGenerate.getSelectedText());
+                clipboard.setContents(stringToCopy, null);
+                new Timer().schedule(new TimerTask() {
+                    public void run() {
+                        lblMessageCopy.setText("");
+                    }
+                }, 5000);
+                lblMessageCopy.setText("Texto copiado al portapapeles");
+            }
+        }
+    };
     //Decrypt
     ActionListener actionListenerDesencriptarBtn = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -181,6 +208,8 @@ public class Opciones extends javax.swing.JFrame {
             textSalt.setText("");
             textAreaValor.setText("");
             textAreaResultado.setText("");
+            textSizeGenerate.setText("");
+            textAreaGenerate.setText("");
         }
     };
     //Get salt and key from enviroment or fields
@@ -262,5 +291,39 @@ public class Opciones extends javax.swing.JFrame {
         pbeCipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
         byte[] decryptoText = pbeCipher.doFinal(base64Decode(property));
         return new String(decryptoText, "UTF-8");
+    }
+
+    //Action listen button generate
+    ActionListener actionListenerGenerate = new ActionListener() {
+       public void actionPerformed(ActionEvent e){
+           try{
+               Integer size = Integer.parseInt(textSizeGenerate.getText());
+               if(size > 0){
+                   String valorGenerado = generateRandomValue(size);
+                   textAreaGenerate.setText(valorGenerado);
+               }
+           }catch(NumberFormatException ex){
+               System.out.println("Error: " + ex.getMessage());
+               JOptionPane.showMessageDialog(null, "Debes de ingresar solo números","Error",JOptionPane.ERROR_MESSAGE);
+           }catch (Exception ex){
+               System.out.println("Excepcion = " + ex);
+               System.out.println("Error = " + ex.getMessage());
+           }
+       }
+    };
+
+    public String generateRandomValue(Integer size){
+        String response = null;
+        try{
+            SecureRandom secureRandom = new SecureRandom();
+            byte[] values = new byte[size];
+            secureRandom.nextBytes(values);
+            Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+            String value = encoder.encodeToString(values);
+            response = value.replaceAll("[^A-Za-z0-9]+","").substring(0,size);
+        }catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+        return response;
     }
 }
