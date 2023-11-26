@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="form" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="783" height="525"/>
+      <xy x="20" y="20" width="800" height="605"/>
     </constraints>
     <properties/>
     <border type="none" title=""/>
@@ -157,17 +157,70 @@
               <text value="Salir"/>
             </properties>
           </component>
+          <component id="e56c" class="javax.swing.JButton" binding="btnRandom">
+            <constraints>
+              <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Generar cadena aleatoria"/>
+            </properties>
+          </component>
+          <component id="28e9" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="11" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Tamaño"/>
+            </properties>
+          </component>
+          <component id="7f7a8" class="javax.swing.JTextArea" binding="textSizeGenerate">
+            <constraints>
+              <grid row="11" column="3" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="50"/>
+              </grid>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="3450b" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="13" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Valor"/>
+            </properties>
+          </component>
+          <component id="1bf2d" class="javax.swing.JTextArea" binding="textAreaGenerate">
+            <constraints>
+              <grid row="13" column="3" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="50"/>
+              </grid>
+            </constraints>
+            <properties>
+              <editable value="false"/>
+              <enabled value="true"/>
+            </properties>
+          </component>
           <component id="47a8" class="javax.swing.JLabel" binding="lblMessageCopy">
             <constraints>
-              <grid row="14" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="15" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <minimum-size width="10" height="10"/>
+              </grid>
             </constraints>
             <properties>
               <text value=""/>
             </properties>
           </component>
+          <component id="461ae" class="javax.swing.JButton" binding="copiarButton2">
+            <constraints>
+              <grid row="14" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Copiar"/>
+            </properties>
+          </component>
           <component id="38e29" class="javax.swing.JButton" binding="btnClean">
             <constraints>
-              <grid row="9" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="14" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Limpiar"/>

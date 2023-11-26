@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Timer;
 
-public class Opciones {
+public class Opciones extends javax.swing.JFrame {
     private JPanel form;
     private JButton encriptarButton;
     private JButton desencriptarButton;
@@ -35,6 +35,10 @@ public class Opciones {
     private JLabel txtSalt;
     private JLabel lblMessageCopy;
     private JButton btnClean;
+    private JButton btnRandom;
+    private JTextArea textSizeGenerate;
+    private JTextArea textAreaGenerate;
+    private JButton copiarButton2;
 
     //Cont use for crypt and decrypt
     final int ITERATION_COUNT = 4000;
@@ -52,7 +56,7 @@ public class Opciones {
     public void OnInit(){
         frame.pack();
         //Configure the size of the UI
-        frame.setSize(640, 455);
+        frame.setSize(740, 555);
         frame.setVisible(true);
         frame.add(form);
         //Configure text format
@@ -64,6 +68,8 @@ public class Opciones {
         textAreaValor.setWrapStyleWord(true);
         textAreaResultado.setLineWrap(true);
         textAreaResultado.setWrapStyleWord(true);
+        textAreaGenerate.setLineWrap(true);
+        textAreaGenerate.setWrapStyleWord(true);
         //Listen when button is clicked to exit program
         salirButton.addActionListener(actionListenerExit);
         //Listen to checkBox changes to show or hide fields for key and salt
@@ -72,10 +78,14 @@ public class Opciones {
         encriptarButton.addActionListener(actionListenerEncriptarBtn);
         //Listen when button Copy is selected
         copiarButton.addActionListener(actionListenerCopy);
+        //Listen when button Copy 2 is selected
+        copiarButton2.addActionListener(actionListenerCopy2);
         //Listen when decrypt button is clicked
         desencriptarButton.addActionListener(actionListenerDesencriptarBtn);
         //Listen when clean button is clicked
         btnClean.addActionListener(actionListenerCleanBtn);
+        //Listen when button Generate random value is clicked
+        btnRandom.addActionListener(actionListenerGenerate);
         //Show or hide textArea for the key and salt for default
         if(tienesConfiguradaLaLlaveCheckBox.isSelected()){
             txtAreaLlave.setVisible(false);
@@ -103,7 +113,7 @@ public class Opciones {
                 textSalt.setVisible(true);
                 txtKey.setVisible(true);
                 txtSalt.setVisible(true);
-                frame.setSize(640, 550);
+                frame.setSize(740, 650);
             }
         }
     };
@@ -116,14 +126,16 @@ public class Opciones {
             String llave = keyAndSalt.get(0);
             String salt = keyAndSalt.get(1);
             String valueToCrypt = textAreaValor.getText().trim();
-            if(llave != "" && !llave.isEmpty() && salt != "" && !salt.isEmpty() && valueToCrypt != "" && !valueToCrypt.isEmpty()){
+            if(!Objects.equals(llave, "") && llave != null && !Objects.equals(salt, "") && salt != null && !valueToCrypt.isEmpty()){
                 try {
                     String cryptValue = crypt(valueToCrypt,salt.getBytes("UTF-8"),llave);
                     textAreaResultado.setText(cryptValue);
                     JOptionPane.showMessageDialog(null, "Valor encriptado correctamente.","Éxito",JOptionPane.INFORMATION_MESSAGE);
                 } catch (GeneralSecurityException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 } catch (UnsupportedEncodingException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 }
             }else{
@@ -148,6 +160,23 @@ public class Opciones {
             }
         }
     };
+    //Copy clipboard 2
+    ActionListener actionListenerCopy2 = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            if(!textAreaGenerate.getText().isEmpty()){
+                textAreaGenerate.selectAll();
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                StringSelection stringToCopy = new StringSelection(textAreaGenerate.getSelectedText());
+                clipboard.setContents(stringToCopy, null);
+                new Timer().schedule(new TimerTask() {
+                    public void run() {
+                        lblMessageCopy.setText("");
+                    }
+                }, 5000);
+                lblMessageCopy.setText("Texto copiado al portapapeles");
+            }
+        }
+    };
     //Decrypt
     ActionListener actionListenerDesencriptarBtn = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -158,11 +187,15 @@ public class Opciones {
             if(llave != "" && !llave.isEmpty() && valueToDecrypt != "" && !valueToDecrypt.isEmpty()){
                 try {
                     String decryptValue = decrypt(valueToDecrypt, llave);
-                    textAreaResultado.setText(decryptValue);
-                    JOptionPane.showMessageDialog(null, "Valor desencriptado correctamente.","Éxito",JOptionPane.INFORMATION_MESSAGE);
+                    if(decryptValue != null){
+                        textAreaResultado.setText(decryptValue);
+                        JOptionPane.showMessageDialog(null, "Valor desencriptado correctamente.","Éxito",JOptionPane.INFORMATION_MESSAGE);
+                    }
                 } catch (GeneralSecurityException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 } catch (IOException ex) {
+                    System.out.println("Error: " + ex.getMessage());
                     throw new RuntimeException(ex);
                 }
             }else{
@@ -177,14 +210,22 @@ public class Opciones {
             textSalt.setText("");
             textAreaValor.setText("");
             textAreaResultado.setText("");
+            textSizeGenerate.setText("");
+            textAreaGenerate.setText("");
         }
     };
     //Get salt and key from enviroment or fields
     public List<String> getKeyAndSalt(boolean checked){
         List<String> valores = new ArrayList<>();
         if(checked){
-            valores.add(System.getenv("AES_256_PASS"));
-            valores.add(System.getenv("AES_256_SALT"));
+            if(System.getenv("AES_256_PASS") != null && System.getenv("AES_256_SALT") != null){
+                valores.add(System.getenv("AES_256_PASS"));
+                valores.add(System.getenv("AES_256_SALT"));
+            }else{
+                valores.add(null);
+                valores.add(null);
+                JOptionPane.showMessageDialog(null, "No se cuentan con las variables de entorno configuradas", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }else{
             valores.add(txtAreaLlave.getText().trim());
             valores.add(textSalt.getText().trim());
@@ -240,17 +281,58 @@ public class Opciones {
 
     //Decrypt values
     public String decrypt(String cadena, String password) throws GeneralSecurityException, IOException {
-        String decodeString = new String(Base64.getDecoder().decode(cadena));
-        String[] parts = decodeString.split(":");
-        String IV = parts[0];
-        String salt = parts[1];
-        String property = parts[2];
-        //Generar secret key
-        SecretKeySpec secretKey = createSecretKey(password.toCharArray(), base64Decode(salt), ITERATION_COUNT, KEY_LENGTH);
-        Cipher pbeCipher = Cipher.getInstance("AES/GCM/NoPadding");
-        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, base64Decode(IV));
-        pbeCipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
-        byte[] decryptoText = pbeCipher.doFinal(base64Decode(property));
-        return new String(decryptoText, "UTF-8");
+        String response = null;
+        try{
+            String decodeString = new String(Base64.getDecoder().decode(cadena));
+            String[] parts = decodeString.split(":");
+            String IV = parts[0];
+            String salt = parts[1];
+            String property = parts[2];
+            //Generar secret key
+            SecretKeySpec secretKey = createSecretKey(password.toCharArray(), base64Decode(salt), ITERATION_COUNT, KEY_LENGTH);
+            Cipher pbeCipher = Cipher.getInstance("AES/GCM/NoPadding");
+            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, base64Decode(IV));
+            pbeCipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
+            byte[] decryptoText = pbeCipher.doFinal(base64Decode(property));
+            response = new String(decryptoText, "UTF-8");
+        }catch(Exception e){
+            System.out.println("Error = " + e.getMessage());
+            JOptionPane.showMessageDialog(null,"Ocurrió un error al realiza la desencriptación, verifique el valor a desencriptar","Error",JOptionPane.ERROR_MESSAGE);
+        }
+        return response;
+    }
+
+    //Action listen button generate
+    ActionListener actionListenerGenerate = new ActionListener() {
+       public void actionPerformed(ActionEvent e){
+           try{
+               Integer size = Integer.parseInt(textSizeGenerate.getText());
+               if(size > 0){
+                   String valorGenerado = generateRandomValue(size);
+                   textAreaGenerate.setText(valorGenerado);
+               }
+           }catch(NumberFormatException ex){
+               System.out.println("Error: " + ex.getMessage());
+               JOptionPane.showMessageDialog(null, "Debes de ingresar solo números","Error",JOptionPane.ERROR_MESSAGE);
+           }catch (Exception ex){
+               System.out.println("Excepcion = " + ex);
+               System.out.println("Error = " + ex.getMessage());
+           }
+       }
+    };
+
+    public String generateRandomValue(Integer size){
+        String response = null;
+        try{
+            SecureRandom secureRandom = new SecureRandom();
+            byte[] values = new byte[size];
+            secureRandom.nextBytes(values);
+            Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+            String value = encoder.encodeToString(values);
+            response = value.replaceAll("[^A-Za-z0-9]+","").substring(0,size);
+        }catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+        return response;
     }
 }
